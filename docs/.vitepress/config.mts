@@ -8,7 +8,8 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'typescript', link: '/typescript/question-bank' }
+      { text: 'typescript', link: '/typescript/question-bank' },
+      { text: 'other', link: '/other/index' }
     ],
 
     sidebar: [
@@ -18,7 +19,13 @@ export default defineConfig({
           { text: '题库', link: '/typescript/question-bank' },
           { text: '简单', link: '/typescript/easy' }
         ]
-      }
+      },
+      {
+        text: 'other',
+        items: [
+          { text: '疑难杂症', link: '/other/index' },
+        ]
+      },
     ],
 
     socialLinks: [
