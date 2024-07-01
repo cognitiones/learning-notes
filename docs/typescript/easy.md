@@ -100,3 +100,128 @@ interface Todo1 {
 }
 ```
 
+## Tuple to Object
+
+![image-20240701105133408](http://cdn.chen-zeqi.cn/image-20240701105133408.png)
+
+```ts
+type TupleToObject<T extends readonly (string | symbol | number)[]> = {
+    [Key in T[number]]: Key 
+}
+```
+
+**解析**
+
+1、数组 key值 有 string | Symbol |number 三种 所以用 readonly (string | symbol | number)[] 
+
+2、T[number] 方法能遍历数组元素 用 [key in T[number]] 来输出 全部数组key值，value值 为 key 值
+
+**测试用例**
+
+```ts
+//测试工具
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+  ? true
+  : false
+
+type Expect<T extends true> = T
+
+//用例
+const tuple = ['tesla', 'model 3', 'model X', 'model Y'] as const
+const tupleNumber = [1, 2, 3, 4] as const
+const sym1 = Symbol(1)
+const sym2 = Symbol(2)
+const tupleSymbol = [sym1, sym2] as const
+const tupleMix = [1, '2', 3, '4', sym1] as const
+
+type cases = [
+  Expect<Equal<TupleToObject<typeof tuple>, { tesla: 'tesla'; 'model 3': 'model 3'; 'model X': 'model X'; 'model Y': 'model Y' }>>,
+  Expect<Equal<TupleToObject<typeof tupleNumber>, { 1: 1; 2: 2; 3: 3; 4: 4 }>>,
+  Expect<Equal<TupleToObject<typeof tupleSymbol>, { [sym1]: typeof sym1; [sym2]: typeof sym2 }>>,
+  Expect<Equal<TupleToObject<typeof tupleMix>, { 1: 1; '2': '2'; 3: 3; '4': '4'; [sym1]: typeof sym1 }>>,
+]
+
+// @ts-expect-error
+type error = TupleToObject<[[1, 2], {}]>
+```
+
+## First of Array
+
+![image-20240701112838809](http://cdn.chen-zeqi.cn/image-20240701112838809.png)
+
+```ts
+//anwser
+type First<T extends unknown[]> = T extends [infer F, ...infer Rest] ? F : never
+```
+
+**解析**
+
+1、用 [infer F, ...infer Rest] 声明 第一个值 跟  其他值
+
+2、用 T extends [infer F, ...infer Rest] ? F : never 判断 如果数组元素大于1 则返回 第一个值
+
+**测试用例**
+
+```ts
+//测试工具
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+  ? true
+  : false
+
+type Expect<T extends true> = T
+
+//用例
+type cases = [
+  Expect<Equal<First<[3, 2, 1]>, 3>>,
+  Expect<Equal<First<[() => 123, { a: string }]>, () => 123>>,
+  Expect<Equal<First<[]>, never>>,
+  Expect<Equal<First<[undefined]>, undefined>>
+];
+
+type errors = [
+  // @ts-expect-error
+  First<"notArray">,
+  // @ts-expect-error
+  First<{ 0: "arrayLike" }>
+];
+```
+
+## Length of Tuple
+
+![image-20240701112848973](http://cdn.chen-zeqi.cn/image-20240701112848973.png)
+
+```ts
+//answer
+type Length<T extends readonly unknown[]> = T['length']
+```
+
+**解析**
+
+1、数组长度为 可读 ，用 readonly unknown[] 声明
+
+2、数组长度值 用 T['length'] 表示
+
+**测试用例**
+
+```ts
+//测试工具
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+  ? true
+  : false
+
+type Expect<T extends true> = T
+
+//用例
+const tesla = ['tesla', 'model 3', 'model X', 'model Y'] as const
+const spaceX = ['FALCON 9', 'FALCON HEAVY', 'DRAGON', 'STARSHIP', 'HUMAN SPACEFLIGHT'] as const
+
+type cases = [
+  Expect<Equal<Length<typeof tesla>, 4>>,
+  Expect<Equal<Length<typeof spaceX>, 5>>,
+  // @ts-expect-error
+  Length<5>,
+  // @ts-expect-error
+  Length<'hello world'>,
+]
+```
+
